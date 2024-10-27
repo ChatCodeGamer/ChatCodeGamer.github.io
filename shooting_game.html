@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shooting Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #1c1c1c;
+            color: white;
+            overflow: hidden;
+        }
+        #game-container {
+            display: none;
+            text-align: center;
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background-color: #333;
+        }
+        #main-menu, #shop {
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .target {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .normal {
+            background-image: url('red_target.png');
+            background-size: cover;
+            width: 50px;
+            height: 50px;
+        }
+        .gold {
+            background-image: url('gold_target.png');
+            background-size: cover;
+            width: 50px;
+            height: 50px;
+        }
+        .grey {
+            background-image: url('grey_target.png');
+            background-size: cover;
+            width: 50px;
+            height: 50px;
+        }
+        .gun {
+            width: 100px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-menu">
+        <h1>Welcome to Shooting Game</h1>
+        <button onclick="startGame()">Start Game</button>
+        <button onclick="openShop()">Go to Shop</button>
+    </div>
+
+    <div id="game-container">
+        <p id="score">Score: 0</p>
+        <p>Current Gun: <span id="current-gun">Basic Gun</span></p>
+        <button onclick="endGame()">Back to Main Menu</button>
+    </div>
+
+    <div id="shop" style="display: none;">
+        <h1>Shop</h1>
+        <p>Coins: <span id="coins">0</span></p>
+        <div>
+            <img src="basic_gun.png" alt="Basic Gun" class="gun">
+            <button onclick="buyGun('Basic Gun', 0)">Basic Gun - Free</button>
+        </div>
+        <div>
+            <img src="cool_gun.png" alt="Cool Gun" class="gun">
+            <button onclick="buyGun('Cool Gun', 10)">Cool Gun - 10 Coins</button>
+        </div>
+        <div>
+            <img src="mega_gun.png" alt="Mega Gun" class="gun">
+            <button onclick="buyGun('Mega Gun', 20)">Mega Gun - 20 Coins</button>
+        </div>
+        <br><button onclick="backToMenu()">Back to Menu</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let coins = 0;
+        let gun = 'Basic Gun';
+
+        function startGame() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('shop').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+
+            score = 0;
+            updateScore();
+            spawnTarget();
+        }
+
+        function endGame() {
+            alert("Game Over! Final Score: " + score);
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+
+        function openShop() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('shop').style.display = 'block';
+        }
+
+        function backToMenu() {
+            document.getElementById('shop').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `Score: ${score}`;
+            document.getElementById('coins').textContent = coins;
+            document.getElementById('current-gun').textContent = gun;
+        }
+
+        function spawnTarget() {
+            const target = document.createElement('div');
+            const targetType = Math.random();
+            let isGold = false;
+            let isGrey = false;
+
+            if (targetType < 0.1) { // 10% chance for a grey target
+                target.className = 'target grey';
+                isGrey = true;
+            } else if (targetType < 0.3) { // 20% chance for a gold target
+                target.className = 'target gold';
+                isGold = true;
+            } else { // 70% chance for a normal target
+                target.className = 'target normal';
+            }
+
+            target.style.top = `${Math.random() * 350}px`;
+            target.style.left = `${Math.random() * 550}px`;
+
+            target.onclick = () => {
+                if (isGrey) {
+                    endGame();
+                } else {
+                    const points = isGold ? 2 : 1;
+                    score += points;
+                    coins += points;
+                    updateScore();
+                }
+                target.remove();
+                spawnTarget();
+            };
+
+            document.getElementById('game-container').appendChild(target);
+
+            setTimeout(() => {
+                if (target.parentNode) {
+                    target.remove();
+                    spawnTarget();
+                }
+            }, 2000); // Target disappears after 2 seconds
+        }
+
+        function buyGun(newGun, cost) {
+            if (coins >= cost) {
+                gun = newGun;
+                coins -= cost;
+                updateScore();
+                alert(`You purchased the ${newGun}!`);
+            } else {
+                alert("Not enough coins!");
+            }
+        }
+    </script>
+</body>
+</html>
